@@ -46,7 +46,7 @@
       </div>
     </nav>
     <div id="map"></div>
-    <div class="coords well">X: {{latlng.lng}}, Y: {{latlng.lat}}</div>
+    <div class="coords well">X: {{latlng.lng}}, Y: {{latlng.lat}}, Z: {{map.getZoom()}}</div>
     <div class="editor well" ng-if="editor" ng-switch="editorTab">
       <ul class="nav nav-tabs">
         <li ng-class="{'active':editorTab=='layers'}" ng-click="editorTab='layers'"><a href="#">Layers</a></li>
@@ -55,23 +55,27 @@
       <div ng-switch-when="layers">
         <br/>
         <table class="table">
-          <tr><th>Center</th><th>Size</th><th>URL</th><th></th></tr>
+          <tr><th>Center</th><th>MinZ</th><th>MaxZ</th><th>Size</th><th>URL</th><th></th></tr>
           <tr ng-repeat="layer in layers">
-            <td><input type="text" class="pointbox form-control" ng-model="layer.center" /></td>
-            <td><input type="text" class="pointbox form-control" ng-model="layer.size" /></td>
-            <td><input type="text" class="urlbox form-control" ng-model="layer.url" /></td>
+            <td><input type="text" class="pointbox" ng-model="layer.center" /></td>
+            <td><input type="number" class="zoom" ng-model="layer.minZoom" /></td>
+            <td><input type="number" class="zoom" ng-model="layer.maxZoom" /></td>
+            <td><input type="text" class="pointbox" ng-model="layer.size" /></td>
+            <td><input type="text" class="urlbox" ng-model="layer.url" /></td>
             <td><a class='btn btn-xs btn-danger' ng-click="layers.splice($index, 1)"><span class="glyphicon glyphicon-remove"></span></a></td>
           </tr>
-          <tr><td></td><td></td><td></td><td><a class="btn btn-xs btn-success" ng-click="addLayer()"><span class="glyphicon glyphicon-plus"></span></a></td></tr>
+          <tr><td></td><td></td><td></td><td></td><td></td><td><a class="btn btn-xs btn-success" ng-click="addLayer()"><span class="glyphicon glyphicon-plus"></span></a></td></tr>
         </table>
       </div>
       <div ng-switch-when="markers">
         <br/>
         <table class="table">
-          <tr><th>Coords</th><th>Icon</th><th>Color</th><th>Title</th><th></th></tr>
+          <tr><th>Coords</th><th>MinZ</th><th>MaxZ</th><th>Icon</th><th>Color</th><th>Title</th><th></th></tr>
           <tr ng-repeat="marker in markers">
-            <td><input type="text" class="pointbox form-control" ng-model="marker.coords" /></td>
-            <td><select class="dropdown form-control" ng-model="marker.icon">
+            <td><input type="text" class="pointbox" ng-model="marker.coords" /></td>
+            <td><input type="number" class="zoom" ng-model="marker.minZoom" /></td>
+            <td><input type="number" class="zoom" ng-model="marker.maxZoom" /></td>
+            <td><select class="dropdown" ng-model="marker.icon">
               <option value="">None</option>
               <option value="bookmark">Bookmark</option>
               <option value="star">Capital</option>
@@ -87,7 +91,7 @@
               <option value="tint">Water</option>
               <option value="remove">X</option>
             </select></td>
-            <td><select class="dropdown form-control" ng-model="marker.color">
+            <td><select class="dropdown" ng-model="marker.color">
               <option value="red">Red</option>
               <option value="orange">Orange</option>
               <option value="beige">Beige</option>
@@ -98,10 +102,10 @@
               <option value="gray">Gray</option>
               <option value="white">White</option>
             </select></td>
-            <td><input type="text" class="urlbox form-control" ng-model="marker.title" /></td>
+            <td><input type="text" class="urlbox" ng-model="marker.title" /></td>
             <td><a class='btn btn-xs btn-danger' ng-click="markers.splice($index, 1)"><span class="glyphicon glyphicon-remove"></span></a></td>
           </tr>
-          <tr><td></td><td></td><td></td><td></td><td><a class="btn btn-xs btn-success" ng-click="addMarker()"><span class="glyphicon glyphicon-plus"></span></a></td></tr>
+          <tr><td></td><td></td><td></td><td></td><td></td><td></td><td><a class="btn btn-xs btn-success" ng-click="addMarker()"><span class="glyphicon glyphicon-plus"></span></a></td></tr>
         </table>
       </div>
       <hr/>

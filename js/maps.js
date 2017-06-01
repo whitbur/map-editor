@@ -26,32 +26,45 @@ map = null;
         }
         $http.get('map.json')
             .then(function(successData) {
-                $scope.layers = successData.data.layers;
-                $scope.markers = successData.data.markers;
+                $scope.layers = successData.data.layers.map(function(layer) {
+                    if (layer.center == undefined){ layer.center = "500,500" }
+                    if (layer.minZoom == undefined){ layer.minZoom = -3 }
+                    if (layer.maxZoom == undefined){ layer.maxZoom = 6 }
+                    return layer
+                });;
+                $scope.markers = successData.data.markers.map(function(marker) {
+                    if (marker.coords == undefined){ marker.coords = "500,500" }
+                    if (marker.minZoom == undefined){ marker.minZoom = -3 }
+                    if (marker.maxZoom == undefined){ marker.maxZoom = 6 }
+                    return marker
+                });
                 if ($scope.layers.length > 0) {
                     var layer = $scope.layers[0];
-                    var mapBounds = boundsFromCenterSize(layer.center, layer.size);
-                    if ($location.search()['topLeft'] != null && $location.search()['bottomRight'] != null) {
-                        var tl = JSON.parse('['+$location.search()['topLeft']+']');
-                        var br = JSON.parse('['+$location.search()['bottomRight']+']');
-                        mapBounds = [[tl[1], tl[0]], [br[1], br[0]]];
-                    }
-                    $scope.map.fitBounds(mapBounds);
+                    var layerCenter = JSON.parse('['+layer.center+']')
+                    var centerX = $location.search()['centerX'] != null ? $location.search()['centerX'] : layerCenter[0]
+                    var centerY = $location.search()['centerY'] != null ? $location.search()['centerY'] : layerCenter[1]
+                    var zoom = $location.search()['zoom'] != null ? $location.search()['zoom'] : -2
+                    $scope.map.setView([centerY, centerX], zoom)
                 }
             });
 
         $scope.refreshMap = function() {
+            var zoom = $scope.map.getZoom();
             $scope.map.eachLayer(function(layer){$scope.map.removeLayer(layer);});
             $.each($scope.layers, function(index, layer) {
                 try {
-                    bounds = boundsFromCenterSize(layer.center, layer.size);
-                    L.imageOverlay(layer.url, bounds).addTo($scope.map);
+                    if (layer.minZoom <= zoom && zoom <= layer.maxZoom) {
+                        bounds = boundsFromCenterSize(layer.center, layer.size);
+                        L.imageOverlay(layer.url, bounds).addTo($scope.map);
+                    }
                 } catch(e) {}
             });
             $.each($scope.markers, function(index, marker) {
                 try {
-                    var coords = JSON.parse('['+marker.coords+']');
-                    L.marker([coords[1],coords[0]], {title: marker.title, icon: L.AwesomeMarkers.icon({icon: marker.icon, markerColor: marker.color})}).addTo($scope.map);
+                    if (marker.minZoom <= zoom && zoom <= marker.maxZoom) {
+                        var coords = JSON.parse('['+marker.coords+']');
+                        L.marker([coords[1],coords[0]], {title: marker.title, icon: L.AwesomeMarkers.icon({icon: marker.icon, markerColor: marker.color})}).addTo($scope.map);
+                    }
                 } catch(e) {}
             });
             L.simpleGraticule({
@@ -61,7 +74,7 @@ map = null;
                 zoomIntervals: [
                   {start: -10, end: -2, interval: 1000},
                   {start: -2, end: -1, interval: 500},
-                  {start: -1, end: 0, interval: 200},
+                  {start: -1, end: 0, interval: 250},
                   {start: 0, end: 2, interval: 100},
                   {start: 2, end: 3, interval: 50},
                   {start: 3, end: 4, interval: 25},
@@ -74,7 +87,7 @@ map = null;
             $scope.layers.push({url:'http://cds130.org/wiki/images/digitizationgrid1a.svg',center:'500,500',size: '100,100'});
         };
         $scope.addMarker = function() {
-            $scope.markers.push({coords:'500,500', icon: '', color: 'red', title:"New Marker"});
+            $scope.markers.push({coords: '500,500', minZoom: -2, maxZoom: 6, icon: '', color: 'red', title: "New Marker"});
         };
         $scope.save = function() {
             $http.post('save_map.php', {password: $scope.formData.password, map: {layers:$scope.layers, markers:$scope.markers}})
@@ -103,6 +116,7 @@ map = null;
             $scope.latlng = event.latlng;
             $scope.$apply();
         });
+        $scope.map.on('zoomend', function(){ $scope.refreshMap(); }, true);
         $scope.$watch('layers', function(){ $scope.refreshMap(); }, true);
         $scope.$watch('markers', function(){ $scope.refreshMap(); }, true);
     }]);
