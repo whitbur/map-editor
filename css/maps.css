@@ -1,0 +1,45 @@
+html, body {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0; }
+
+body {
+  display: flex;
+  flex-direction: column; }
+
+.navbar {
+  margin: 0; }
+
+#map {
+  flex-grow: 1;
+  z-index: 1; }
+
+.leaflet-container {
+  background: #354B70; }
+  .leaflet-container .leaflet-grid-label {
+    color: #000; }
+
+.coords {
+  position: absolute;
+  z-index: 2;
+  bottom: 10px;
+  left: 10px;
+  padding: 10px; }
+
+.editor {
+  position: absolute;
+  z-index: 2;
+  top: 100px;
+  right: 0px;
+  width: 50%;
+  min-width: 650px;
+  max-height: 80%;
+  overflow-y: auto;
+  padding: 10px;
+  border: 5px solid #333;
+  border-right: 0px; }
+  .editor .pointbox {
+    width: 100px; }
+  .editor .urlbox {
+    width: 200px; }

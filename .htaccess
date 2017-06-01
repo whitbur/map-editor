@@ -1,0 +1,5 @@
+# explicitly disable caching for scripts and other dynamic files
+<FilesMatch ".(js|json)$">
+Header set Cache-Control no-cache
+Header set Pragma no-cache
+</FilesMatch>
