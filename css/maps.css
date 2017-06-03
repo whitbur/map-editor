@@ -18,7 +18,23 @@ body {
 .leaflet-container {
   background: #354B70; }
   .leaflet-container .leaflet-grid-label {
-    color: #000; }
+    color: black; }
+  .leaflet-container .text-tooltip {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: white;
+    text-shadow: 3px 2px black; }
+    .leaflet-container .text-tooltip.size-1 {
+      font-size: 1em; }
+    .leaflet-container .text-tooltip.size-2 {
+      font-size: 2em; }
+    .leaflet-container .text-tooltip.size-3 {
+      font-size: 4em; }
+    .leaflet-container .text-tooltip.size-4 {
+      font-size: 8em; }
+    .leaflet-container .text-tooltip.size-5 {
+      font-size: 16em; }
 
 .coords {
   position: absolute;

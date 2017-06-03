@@ -23,6 +23,7 @@ map = null; // For debugging in console
         $scope.map = L.map('map', {crs: L.CRS.Simple, minZoom: -3});
         $scope.layers = [];
         $scope.markers = [];
+        $scope.texts = [];
         map = $scope.map;
 
         var boundsFromCenterSize = function(center, size) {
@@ -34,18 +35,25 @@ map = null; // For debugging in console
         };
         $http.get('map.json')
             .then(function(successData) {
-                $scope.layers = successData.data.layers.map(function(layer) {
-                    if (layer.center == undefined){ layer.center = "500,500" }
+                $scope.layers = successData.data.layers ? successData.data.layers.map(function(layer) {
+                    if (layer.center == undefined){ layer.center = "2500,2500" }
                     if (layer.minZoom == undefined){ layer.minZoom = -3 }
                     if (layer.maxZoom == undefined){ layer.maxZoom = 6 }
                     return layer;
-                });
-                $scope.markers = successData.data.markers.map(function(marker) {
-                    if (marker.coords == undefined){ marker.coords = "500,500" }
+                }) : [];
+                $scope.markers = successData.data.markers ? successData.data.markers.map(function(marker) {
+                    if (marker.coords == undefined){ marker.coords = "2500,2500" }
                     if (marker.minZoom == undefined){ marker.minZoom = -3 }
                     if (marker.maxZoom == undefined){ marker.maxZoom = 6 }
                     return marker;
-                });
+                }) : [];
+                $scope.texts = successData.data.texts ? successData.data.texts.map(function(text) {
+                    if (text.coords == undefined){ text.coords = "2500,2500" }
+                    if (text.minZoom == undefined){ text.minZoom = -3 }
+                    if (text.maxZoom == undefined){ text.maxZoom = 6 }
+                    if (text.size == undefined){ text.size = 2 }
+                    return text;
+                }) : [];
                 if ($scope.layers.length > 0) {
                     var layer = $scope.layers[0];
                     var layerCenter = JSON.parse('['+layer.center+']');
@@ -75,6 +83,14 @@ map = null; // For debugging in console
                     }
                 } catch(e) {}
             });
+            $.each($scope.texts, function(index, text) {
+                try {
+                    if (text.minZoom <= zoom && zoom <= text.maxZoom) {
+                        var coords = JSON.parse('['+text.center+']');
+                        $scope.map.openTooltip(text.text, coords.reverse(), {direction:"center", permanent: true, className: "text-tooltip size-"+text.size});
+                    }
+                } catch(e) {}
+            });
             L.simpleGraticule({
                 interval: 20,
                 redraw: 'moveend',
@@ -92,13 +108,16 @@ map = null; // For debugging in console
         };
         $scope.refreshMap();
         $scope.addLayer = function() {
-            $scope.layers.push({url:'http://cds130.org/wiki/images/digitizationgrid1a.svg',center:'2500,2500',size: '100,100'});
+            $scope.layers.push({center:'2500,2500', minZoom: -3, maxZoom: 6, size: '100,100', url:'http://cds130.org/wiki/images/digitizationgrid1a.svg'});
         };
         $scope.addMarker = function() {
-            $scope.markers.push({coords: '2500,2500', minZoom: -2, maxZoom: 6, icon: '', color: 'red', title: "New Marker"});
+            $scope.markers.push({coords: '2500,2500', minZoom: -3, maxZoom: 6, icon: '', color: 'red', title: "New Marker"});
+        };
+        $scope.addText = function() {
+            $scope.texts.push({center: '2500,2500', minZoom: -3, maxZoom: 6, size: 2, text: "New Text"});
         };
         $scope.save = function() {
-            $http.post('save_map.php', {password: $scope.formData.password, map: {layers:$scope.layers, markers:$scope.markers}})
+            $http.post('save_map.php', {password: $scope.formData.password, map: {layers:$scope.layers, markers:$scope.markers, texts:$scope.texts}})
                 .then(function(successData) {
                     $scope.saved = 'success';
                     $timeout(function(){
@@ -127,5 +146,6 @@ map = null; // For debugging in console
         $scope.map.on('zoomend', function(){ $scope.refreshMap(); }, true);
         $scope.$watch('layers', function(){ $scope.refreshMap(); }, true);
         $scope.$watch('markers', function(){ $scope.refreshMap(); }, true);
+        $scope.$watch('texts', function(){ $scope.refreshMap(); }, true);
     }]);
 })();
