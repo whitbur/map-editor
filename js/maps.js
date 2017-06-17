@@ -1,4 +1,12 @@
-map = null;
+/* 
+global L
+global $
+global angular
+global map:true
+*/
+
+map = null; // For debugging in console
+
 (function(){
     var mapsApp = angular.module('mapsApp', []);
 
@@ -23,28 +31,28 @@ map = null;
             var w2 = s[0]/2;
             var h2 = s[1]/2;
             return [[c[1]-h2,c[0]-w2],[c[1]+h2,c[0]+w2]];
-        }
+        };
         $http.get('map.json')
             .then(function(successData) {
                 $scope.layers = successData.data.layers.map(function(layer) {
                     if (layer.center == undefined){ layer.center = "500,500" }
                     if (layer.minZoom == undefined){ layer.minZoom = -3 }
                     if (layer.maxZoom == undefined){ layer.maxZoom = 6 }
-                    return layer
-                });;
+                    return layer;
+                });
                 $scope.markers = successData.data.markers.map(function(marker) {
                     if (marker.coords == undefined){ marker.coords = "500,500" }
                     if (marker.minZoom == undefined){ marker.minZoom = -3 }
                     if (marker.maxZoom == undefined){ marker.maxZoom = 6 }
-                    return marker
+                    return marker;
                 });
                 if ($scope.layers.length > 0) {
                     var layer = $scope.layers[0];
-                    var layerCenter = JSON.parse('['+layer.center+']')
-                    var centerX = $location.search()['centerX'] != null ? $location.search()['centerX'] : layerCenter[0]
-                    var centerY = $location.search()['centerY'] != null ? $location.search()['centerY'] : layerCenter[1]
-                    var zoom = $location.search()['zoom'] != null ? $location.search()['zoom'] : -2
-                    $scope.map.setView([centerY, centerX], zoom)
+                    var layerCenter = JSON.parse('['+layer.center+']');
+                    var centerX = $location.search()['centerX'] != null ? $location.search()['centerX'] : layerCenter[0];
+                    var centerY = $location.search()['centerY'] != null ? $location.search()['centerY'] : layerCenter[1];
+                    var zoom = $location.search()['zoom'] != null ? $location.search()['zoom'] : -2;
+                    $scope.map.setView([centerY, centerX], zoom);
                 }
             });
 
@@ -54,7 +62,7 @@ map = null;
             $.each($scope.layers, function(index, layer) {
                 try {
                     if (layer.minZoom <= zoom && zoom <= layer.maxZoom) {
-                        bounds = boundsFromCenterSize(layer.center, layer.size);
+                        var bounds = boundsFromCenterSize(layer.center, layer.size);
                         L.imageOverlay(layer.url, bounds).addTo($scope.map);
                     }
                 } catch(e) {}
@@ -84,10 +92,10 @@ map = null;
         };
         $scope.refreshMap();
         $scope.addLayer = function() {
-            $scope.layers.push({url:'http://cds130.org/wiki/images/digitizationgrid1a.svg',center:'500,500',size: '100,100'});
+            $scope.layers.push({url:'http://cds130.org/wiki/images/digitizationgrid1a.svg',center:'2500,2500',size: '100,100'});
         };
         $scope.addMarker = function() {
-            $scope.markers.push({coords: '500,500', minZoom: -2, maxZoom: 6, icon: '', color: 'red', title: "New Marker"});
+            $scope.markers.push({coords: '2500,2500', minZoom: -2, maxZoom: 6, icon: '', color: 'red', title: "New Marker"});
         };
         $scope.save = function() {
             $http.post('save_map.php', {password: $scope.formData.password, map: {layers:$scope.layers, markers:$scope.markers}})
@@ -101,7 +109,7 @@ map = null;
                     $timeout(function(){
                         $scope.saved = 'none';
                     }, 3000);
-                })
+                });
         };
 
         $scope.toggleEditor = function() {
