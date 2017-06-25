@@ -33,6 +33,7 @@ body {
     color: #EDEDED;
     text-shadow: 0 0 5px black;
     
+    &:before { content: none; }
     &.size-1 { font-size: 1em; }
     &.size-2 { font-size: 2em; }
     &.size-3 { font-size: 4em; }

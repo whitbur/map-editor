@@ -78,8 +78,9 @@ map = null; // For debugging in console
             $.each($scope.markers, function(index, marker) {
                 try {
                     if (marker.minZoom <= zoom && zoom <= marker.maxZoom) {
-                        var coords = JSON.parse('['+marker.coords+']');
-                        L.marker([coords[1],coords[0]], {title: marker.title, icon: L.AwesomeMarkers.icon({icon: marker.icon, markerColor: marker.color})}).addTo($scope.map);
+                        var coords = JSON.parse('['+marker.coords+']').reverse();
+                        L.marker(coords, {title: marker.title, icon: L.AwesomeMarkers.icon({icon: marker.icon, markerColor: marker.color})}).addTo($scope.map);
+                        $scope.map.openTooltip(marker.title, coords, {direction:"bottom", permanent: true, className: "text-tooltip size-1", offset: [0,-10]});
                     }
                 } catch(e) {}
             });

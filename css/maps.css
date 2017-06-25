@@ -25,6 +25,8 @@ body {
     box-shadow: none;
     color: #EDEDED;
     text-shadow: 0 0 5px black; }
+    .leaflet-container .text-tooltip:before {
+      content: none; }
     .leaflet-container .text-tooltip.size-1 {
       font-size: 1em; }
     .leaflet-container .text-tooltip.size-2 {
