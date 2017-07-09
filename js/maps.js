@@ -33,36 +33,6 @@ map = null; // For debugging in console
             var h2 = s[1]/2;
             return [[c[1]-h2,c[0]-w2],[c[1]+h2,c[0]+w2]];
         };
-        $http.get('map.json')
-            .then(function(successData) {
-                $scope.layers = successData.data.layers ? successData.data.layers.map(function(layer) {
-                    if (layer.center == undefined){ layer.center = "2500,2500" }
-                    if (layer.minZoom == undefined){ layer.minZoom = -3 }
-                    if (layer.maxZoom == undefined){ layer.maxZoom = 6 }
-                    return layer;
-                }) : [];
-                $scope.markers = successData.data.markers ? successData.data.markers.map(function(marker) {
-                    if (marker.coords == undefined){ marker.coords = "2500,2500" }
-                    if (marker.minZoom == undefined){ marker.minZoom = -3 }
-                    if (marker.maxZoom == undefined){ marker.maxZoom = 6 }
-                    return marker;
-                }) : [];
-                $scope.texts = successData.data.texts ? successData.data.texts.map(function(text) {
-                    if (text.coords == undefined){ text.coords = "2500,2500" }
-                    if (text.minZoom == undefined){ text.minZoom = -3 }
-                    if (text.maxZoom == undefined){ text.maxZoom = 6 }
-                    if (text.size == undefined){ text.size = 2 }
-                    return text;
-                }) : [];
-                if ($scope.layers.length > 0) {
-                    var layer = $scope.layers[0];
-                    var layerCenter = JSON.parse('['+layer.center+']');
-                    var centerX = $location.search()['centerX'] != null ? $location.search()['centerX'] : layerCenter[0];
-                    var centerY = $location.search()['centerY'] != null ? $location.search()['centerY'] : layerCenter[1];
-                    var zoom = $location.search()['zoom'] != null ? $location.search()['zoom'] : -2;
-                    $scope.map.setView([centerY, centerX], zoom);
-                }
-            });
 
         $scope.refreshMap = function() {
             var zoom = $scope.map.getZoom();
@@ -75,15 +45,6 @@ map = null; // For debugging in console
                     }
                 } catch(e) {}
             });
-            $.each($scope.markers, function(index, marker) {
-                try {
-                    if (marker.minZoom <= zoom && zoom <= marker.maxZoom) {
-                        var coords = JSON.parse('['+marker.coords+']').reverse();
-                        L.marker(coords, {title: marker.title, icon: L.AwesomeMarkers.icon({icon: marker.icon, markerColor: marker.color})}).addTo($scope.map);
-                        $scope.map.openTooltip(marker.title, coords, {direction:"bottom", permanent: true, className: "text-tooltip size-1", offset: [0,-10]});
-                    }
-                } catch(e) {}
-            });
             $.each($scope.texts, function(index, text) {
                 try {
                     if (text.minZoom <= zoom && zoom <= text.maxZoom) {
@@ -92,6 +53,17 @@ map = null; // For debugging in console
                     }
                 } catch(e) {}
             });
+            if (!$scope.isNoMarkers()) {
+                $.each($scope.markers, function(index, marker) {
+                    try {
+                        if (marker.minZoom <= zoom && zoom <= marker.maxZoom) {
+                            var coords = JSON.parse('['+marker.coords+']').reverse();
+                            L.marker(coords, {title: marker.title, icon: L.AwesomeMarkers.icon({icon: marker.icon, markerColor: marker.color})}).addTo($scope.map);
+                            $scope.map.openTooltip(marker.title, coords, {direction:"bottom", permanent: true, className: "text-tooltip size-1", offset: [0,-10]});
+                        }
+                    } catch(e) {}
+                });
+            }
             L.simpleGraticule({
                 interval: 20,
                 redraw: 'moveend',
@@ -107,7 +79,6 @@ map = null; // For debugging in console
                   {start: 6, end: 20, interval: 1},
             ]}).addTo($scope.map);
         };
-        $scope.refreshMap();
         $scope.addLayer = function() {
             $scope.layers.push({center:'2500,2500', minZoom: -3, maxZoom: 6, size: '100,100', url:'http://cds130.org/wiki/images/digitizationgrid1a.svg'});
         };
@@ -140,6 +111,10 @@ map = null; // For debugging in console
             return window.location.search.match(/embed/i) != null;
         };
         
+        $scope.isNoMarkers = function() {
+            return window.location.search.match(/nomarkers/i) != null;
+        };
+        
         $scope.map.on('mousemove', function(event) {
             $scope.latlng = event.latlng;
             $scope.$apply();
@@ -148,5 +123,38 @@ map = null; // For debugging in console
         $scope.$watch('layers', function(){ $scope.refreshMap(); }, true);
         $scope.$watch('markers', function(){ $scope.refreshMap(); }, true);
         $scope.$watch('texts', function(){ $scope.refreshMap(); }, true);
+        
+        $http.get('map.json')
+            .then(function(successData) {
+                $scope.layers = successData.data.layers ? successData.data.layers.map(function(layer) {
+                    if (layer.center == undefined){ layer.center = "2500,2500" }
+                    if (layer.minZoom == undefined){ layer.minZoom = -3 }
+                    if (layer.maxZoom == undefined){ layer.maxZoom = 6 }
+                    return layer;
+                }) : [];
+                $scope.markers = successData.data.markers ? successData.data.markers.map(function(marker) {
+                    if (marker.coords == undefined){ marker.coords = "2500,2500" }
+                    if (marker.minZoom == undefined){ marker.minZoom = -3 }
+                    if (marker.maxZoom == undefined){ marker.maxZoom = 6 }
+                    return marker;
+                }) : [];
+                $scope.texts = successData.data.texts ? successData.data.texts.map(function(text) {
+                    if (text.coords == undefined){ text.coords = "2500,2500" }
+                    if (text.minZoom == undefined){ text.minZoom = -3 }
+                    if (text.maxZoom == undefined){ text.maxZoom = 6 }
+                    if (text.size == undefined){ text.size = 2 }
+                    return text;
+                }) : [];
+                if ($scope.layers.length > 0) {
+                    var layer = $scope.layers[0];
+                    var layerCenter = JSON.parse('['+layer.center+']');
+                    var centerX = $location.search()['centerX'] != null ? $location.search()['centerX'] : layerCenter[0];
+                    var centerY = $location.search()['centerY'] != null ? $location.search()['centerY'] : layerCenter[1];
+                    var zoom = $location.search()['zoom'] != null ? $location.search()['zoom'] : -2;
+                    $scope.map.setView([centerY, centerX], zoom);
+                }
+            });
+        
+        $scope.refreshMap();
     }]);
 })();
